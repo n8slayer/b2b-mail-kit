@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Osprey Outreach</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <img src="{{ url_for('static', filename='osprey-logo.png') }}" alt="Osprey Systems" class="logo">
+  <h1>Osprey Outreach</h1>
+</header>
+
+<main>
+  <section id="upload-section" class="card">
+    <p>Upload a CSV with an <code>email</code> column (optional <code>name</code>, <code>company</code> columns).</p>
+    <form id="upload-form">
+      <input type="file" id="file-input" accept=".csv" required>
+      <button type="submit">Process list</button>
+    </form>
+    <div id="progress-wrap" hidden>
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+      <span id="progress-text"></span>
+    </div>
+    <p id="error-msg" class="error" hidden></p>
+  </section>
+
+  <section id="results-section" hidden>
+    <div class="toolbar">
+      <label>Filter: <select id="fit-filter">
+        <option value="">All</option>
+        <option value="Good">Good</option>
+        <option value="Maybe">Maybe</option>
+        <option value="Unlikely">Unlikely</option>
+        <option value="Unknown">Unknown</option>
+      </select></label>
+      <a id="download-link" href="#" class="button">Download CSV</a>
+    </div>
+    <table id="results-table">
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Company</th><th>Fit</th><th>Reason</th>
+          <th>Subject</th><th>Body</th>
+        </tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
