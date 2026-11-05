@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request
 
-from enrichment import parse_contact, scrape_company_site
+from enrichment import extract_fields, map_columns, parse_contact, scrape_company_site
 from generator import generate_draft
 
 load_dotenv()
@@ -42,16 +42,19 @@ def upload():
     try:
         text = file.read().decode("utf-8-sig")
         reader = csv.DictReader(io.StringIO(text))
-        reader.fieldnames = [
-            (f or "").strip().lower() for f in (reader.fieldnames or [])
-        ]
-        rows = list(reader)
+        reader.fieldnames = [(f or "").strip() for f in (reader.fieldnames or [])]
+        raw_rows = list(reader)
     except (UnicodeDecodeError, csv.Error) as e:
         return jsonify({"error": f"Could not parse CSV: {e}"}), 400
 
-    rows = [r for r in rows if (r.get("email") or "").strip()]
+    column_map = map_columns(reader.fieldnames or [], raw_rows)
+    if not column_map.get("email"):
+        return jsonify({"error": "Could not find a column with email addresses in this CSV"}), 400
+
+    rows = [extract_fields(r, column_map) for r in raw_rows]
+    rows = [r for r in rows if r["email"]]
     if not rows:
-        return jsonify({"error": "No rows with an email column found"}), 400
+        return jsonify({"error": "No rows with a usable email address found"}), 400
 
     job_id = str(uuid.uuid4())
     with JOBS_LOCK:

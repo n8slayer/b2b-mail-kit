@@ -16,6 +16,89 @@ GENERIC_LOCAL_PARTS = {
 REQUEST_TIMEOUT = 6
 USER_AGENT = "Mozilla/5.0 (compatible; OspreyOutreachBot/1.0)"
 
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
+
+EMAIL_HEADERS = {"email", "e mail", "email address", "contact email", "work email", "business email"}
+COMPANY_HEADERS = {"company", "company name", "organization", "organisation", "employer", "business", "account name", "account"}
+FIRST_NAME_HEADERS = {"first name", "firstname", "first", "given name"}
+LAST_NAME_HEADERS = {"last name", "lastname", "last", "surname", "family name"}
+NAME_HEADERS = {"name", "full name", "fullname", "contact name", "contact", "contact person"}
+
+
+def _normalize_header(header: str) -> str:
+    header = (header or "").strip().lower()
+    header = re.sub(r"[_\-]+", " ", header)
+    return re.sub(r"\s+", " ", header)
+
+
+def map_columns(fieldnames: list[str], rows: list[dict]) -> dict:
+    """Guess which column holds email/name/company from arbitrary CSV headers."""
+    normalized = {f: _normalize_header(f) for f in fieldnames}
+    used = set()
+
+    def pick(exact: set, contains: str | None = None):
+        for field, norm in normalized.items():
+            if field not in used and norm in exact:
+                used.add(field)
+                return field
+        if contains:
+            for field, norm in normalized.items():
+                if field not in used and contains in norm:
+                    used.add(field)
+                    return field
+        return None
+
+    email_col = pick(EMAIL_HEADERS, contains="mail")
+    if not email_col:
+        # no header looks like an email column; find whichever column's values
+        # actually look like email addresses
+        best_field, best_score = None, 0
+        for field in fieldnames:
+            if field in used:
+                continue
+            score = sum(1 for r in rows[:25] if EMAIL_RE.search(r.get(field) or ""))
+            if score > best_score:
+                best_field, best_score = field, score
+        if best_field:
+            email_col = best_field
+            used.add(best_field)
+
+    return {
+        "email": email_col,
+        "company": pick(COMPANY_HEADERS, contains="compan"),
+        "first_name": pick(FIRST_NAME_HEADERS),
+        "last_name": pick(LAST_NAME_HEADERS),
+        "name": pick(NAME_HEADERS, contains="name"),
+    }
+
+
+def extract_fields(row: dict, column_map: dict) -> dict:
+    """Pull email/name/company out of a raw CSV row using a column map."""
+    email = ""
+    email_col = column_map.get("email")
+    if email_col:
+        match = EMAIL_RE.search(row.get(email_col) or "")
+        if match:
+            email = match.group(0)
+    if not email:
+        for value in row.values():
+            match = EMAIL_RE.search(value or "")
+            if match:
+                email = match.group(0)
+                break
+
+    name = ""
+    if column_map.get("name"):
+        name = (row.get(column_map["name"]) or "").strip()
+    else:
+        first = (row.get(column_map["first_name"]) or "").strip() if column_map.get("first_name") else ""
+        last = (row.get(column_map["last_name"]) or "").strip() if column_map.get("last_name") else ""
+        name = f"{first} {last}".strip()
+
+    company = (row.get(column_map["company"]) or "").strip() if column_map.get("company") else ""
+
+    return {"email": email, "name": name, "company": company}
+
 
 def parse_contact(row: dict) -> dict:
     email = (row.get("email") or "").strip()
