@@ -8,8 +8,13 @@ const resultsSection = document.getElementById("results-section");
 const resultsBody = document.getElementById("results-body");
 const fitFilter = document.getElementById("fit-filter");
 const downloadLink = document.getElementById("download-link");
+const fileName = document.getElementById("file-name");
 
 let allResults = [];
+
+fileInput.addEventListener("change", () => {
+  fileName.textContent = fileInput.files[0]?.name || "Choose CSV file";
+});
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -77,7 +82,7 @@ function renderResults() {
         const field = btn.dataset.copy;
         navigator.clipboard.writeText(r[field]);
         btn.textContent = "Copied!";
-        setTimeout(() => (btn.textContent = "Copy"), 1200);
+        setTimeout(() => (btn.textContent = "Copy"), 1600);
       });
     });
     resultsBody.appendChild(tr);

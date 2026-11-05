@@ -1,51 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-radius="soft">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Osprey Outreach</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<header>
-  <img src="{{ url_for('static', filename='osprey-logo.png') }}" alt="Osprey Systems" class="logo">
-  <h1>Osprey Outreach</h1>
+<header class="nav">
+  <div class="wrap nav__inner">
+    <div class="brand">
+      <span class="logo" role="img" aria-label="Osprey Systems"></span>
+      <span>Osprey Outreach</span>
+    </div>
+    <span class="nav__tag">B2B draft generator</span>
+  </div>
 </header>
 
 <main>
-  <section id="upload-section" class="card">
-    <p>Upload a CSV with an <code>email</code> column (optional <code>name</code>, <code>company</code> columns).</p>
-    <form id="upload-form">
-      <input type="file" id="file-input" accept=".csv" required>
-      <button type="submit">Process list</button>
-    </form>
-    <div id="progress-wrap" hidden>
-      <div id="progress-bar"><div id="progress-fill"></div></div>
-      <span id="progress-text"></span>
-    </div>
-    <p id="error-msg" class="error" hidden></p>
-  </section>
+  <div class="wrap">
+    <section id="upload-section" class="card">
+      <h1>Turn a contact list into ready-to-send drafts</h1>
+      <p class="lead">Upload a CSV with an <code>email</code> column (optional <code>name</code>, <code>company</code>). Each contact gets a fit check against Osprey's ideal customer profile and a personalized subject + body.</p>
+      <form id="upload-form">
+        <label class="file-field">
+          <input type="file" id="file-input" accept=".csv" required>
+          <span id="file-name">Choose CSV file</span>
+        </label>
+        <button type="submit" class="btn btn--primary">Process list</button>
+      </form>
+      <div id="progress-wrap" hidden>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <span id="progress-text" class="muted"></span>
+      </div>
+      <p id="error-msg" class="error" hidden></p>
+    </section>
 
-  <section id="results-section" hidden>
-    <div class="toolbar">
-      <label>Filter: <select id="fit-filter">
-        <option value="">All</option>
-        <option value="Good">Good</option>
-        <option value="Maybe">Maybe</option>
-        <option value="Unlikely">Unlikely</option>
-        <option value="Unknown">Unknown</option>
-      </select></label>
-      <a id="download-link" href="#" class="button">Download CSV</a>
-    </div>
-    <table id="results-table">
-      <thead>
-        <tr>
-          <th>Name</th><th>Email</th><th>Company</th><th>Fit</th><th>Reason</th>
-          <th>Subject</th><th>Body</th>
-        </tr>
-      </thead>
-      <tbody id="results-body"></tbody>
-    </table>
-  </section>
+    <section id="results-section" hidden>
+      <div class="toolbar">
+        <label class="filter-field">
+          <span class="muted">Filter</span>
+          <select id="fit-filter">
+            <option value="">All</option>
+            <option value="Good">Good</option>
+            <option value="Maybe">Maybe</option>
+            <option value="Unlikely">Unlikely</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </label>
+        <a id="download-link" href="#" class="btn btn--secondary">Download CSV</a>
+      </div>
+      <div class="table-scroll">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Company</th><th>Fit</th><th>Reason</th>
+              <th>Subject</th><th>Body</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </main>
 
 <script src="{{ url_for('static', filename='app.js') }}"></script>
