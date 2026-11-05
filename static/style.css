@@ -253,6 +253,8 @@ select {
 
 table {
   width: 100%;
+  min-width: 1100px;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 16px;
 }
@@ -262,7 +264,17 @@ th, td {
   padding: var(--s-3) var(--s-4);
   text-align: left;
   vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
+
+th:nth-child(1), td:nth-child(1) { width: 9%; }  /* Name */
+th:nth-child(2), td:nth-child(2) { width: 12%; } /* Email */
+th:nth-child(3), td:nth-child(3) { width: 9%; }  /* Company */
+th:nth-child(4), td:nth-child(4) { width: 9%; }  /* Fit */
+th:nth-child(5), td:nth-child(5) { width: 17%; } /* Reason */
+th:nth-child(6), td:nth-child(6) { width: 15%; } /* Subject */
+th:nth-child(7), td:nth-child(7) { width: 29%; } /* Body */
 
 thead th {
   color: var(--muted);
@@ -273,7 +285,7 @@ thead th {
 
 tbody tr:last-child td { border-bottom: none; }
 
-td.body-cell { max-width: 340px; white-space: pre-wrap; }
+td.body-cell { white-space: pre-wrap; }
 
 .fit-badge {
   padding: var(--s-1) var(--s-3);
@@ -281,6 +293,7 @@ td.body-cell { max-width: 340px; white-space: pre-wrap; }
   font-size: 13px;
   font-weight: 500;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .fit-Good { background: #22361f; color: #bff0b0; }
